@@ -1,19 +1,29 @@
 require("./models/User");
+require("./models/Track");
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const authRoutes = require("./routes/authRoutes");
+const trackRoutes = require("./routes/trackRoutes");
 const requireAuth = require("./middlewares/requireAuth");
 
 const app = express();
 
 app.use(bodyParser.json());
 app.use(authRoutes);
+app.use(trackRoutes);
 
 //use  node 2.2.12
 //useUnifiedTopology
 const mongoUri =
   "mongodb://admin:admin@cluster0-shard-00-00.qkhyh.mongodb.net:27017,cluster0-shard-00-01.qkhyh.mongodb.net:27017,cluster0-shard-00-02.qkhyh.mongodb.net:27017/test?ssl=true&replicaSet=atlas-2puvv2-shard-0&authSource=admin&retryWrites=true&w=majority";
+
+if (!mongoUri) {
+  throw new Error(
+    `MongoURI was not supplied.  Make sure you watch the video on setting up Mongo DB!`
+  );
+}
+
 mongoose.connect(mongoUri, {
   useNewUrlParser: true,
   useCreateIndex: true,
@@ -21,16 +31,16 @@ mongoose.connect(mongoUri, {
 });
 
 mongoose.connection.on("connected", () => {
-  console.log("connected to mongo instance");
+  console.log("Connected to mongo instance");
 });
 mongoose.connection.on("error", (err) => {
-  console.log("Eror connecting to mongo", err);
+  console.error("Error connecting to mongo", err);
 });
 
 app.get("/", requireAuth, (req, res) => {
-  res.send(`your emaiil: ${req.user.email}`);
+  res.send(`Your email: ${req.user.email}`);
 });
 
 app.listen(3000, () => {
-  console.log("listening from 3000");
+  console.log("Listening on port 3000");
 });
